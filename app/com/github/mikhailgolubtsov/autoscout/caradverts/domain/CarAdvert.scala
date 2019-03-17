@@ -2,7 +2,8 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import java.time.LocalDate
 
-case class CarAdvertCreateRequest(
+case class CarAdvert(
+    id: AdvertId,
     title: String,
     fuel: FuelType,
     price: Int,

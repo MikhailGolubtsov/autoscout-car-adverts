@@ -5,12 +5,12 @@ import CarAdvertValidationError._
 
 class CarAdvertCreateRequestValidator(clock: Clock) {
 
-  def validate(request: CarAdvertCreateRequest): Set[CarAdvertValidationError] = {
+  def validate(request: CarAdvert): Set[CarAdvertValidationError] = {
     val validationErrors = allChecks.flatMap(_.apply(request))
     validationErrors.toSet
   }
 
-  private type ValidationCheck = CarAdvertCreateRequest => Option[CarAdvertValidationError]
+  private type ValidationCheck = CarAdvert => Option[CarAdvertValidationError]
 
   private val allChecks: Seq[ValidationCheck] = Seq(
     checkIf(InvalidPrice, { r =>
@@ -36,7 +36,7 @@ class CarAdvertCreateRequestValidator(clock: Clock) {
 
   private def checkIf(
       errorToReturn: CarAdvertValidationError,
-      conditionToCheck: CarAdvertCreateRequest => Boolean
+      conditionToCheck: CarAdvert => Boolean
   ): ValidationCheck = { request =>
     if (conditionToCheck(request)) {
       Some(errorToReturn)
@@ -45,7 +45,7 @@ class CarAdvertCreateRequestValidator(clock: Clock) {
     }
   }
 
-  private def isRegistrationDateInFuture(request: CarAdvertCreateRequest): Boolean = {
+  private def isRegistrationDateInFuture(request: CarAdvert): Boolean = {
     def currentDate: LocalDate = clock.instant().atZone(clock.getZone).toLocalDate
     request.firstRegistrationDate match {
       case Some(registrationDate) if registrationDate.compareTo(currentDate) > 0 =>

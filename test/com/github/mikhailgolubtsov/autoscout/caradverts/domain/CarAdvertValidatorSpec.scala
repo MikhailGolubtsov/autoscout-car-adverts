@@ -1,11 +1,12 @@
 package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import java.time._
-import CarAdvertValidationError._
+import java.util.UUID
 
+import CarAdvertValidationError._
 import org.scalatest.{MustMatchers, WordSpec}
 
-class CarAdvertCreateRequestValidatorSpec extends WordSpec with MustMatchers {
+class CarAdvertValidatorSpec extends WordSpec with MustMatchers {
 
   "Validator of car advert creation request" should {
     "return no errors for valid request for a new car" in new TestContext {
@@ -71,7 +72,8 @@ class CarAdvertCreateRequestValidatorSpec extends WordSpec with MustMatchers {
     val today: LocalDate = LocalDate.of(2019, Month.JANUARY, 1)
 
     def validNewCarRequest = {
-      CarAdvertCreateRequest(
+      CarAdvert(
+        id = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549"),
         title = "Audi",
         fuel = FuelType.Gasoline,
         price = 10000,
