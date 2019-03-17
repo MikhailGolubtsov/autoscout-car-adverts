@@ -2,10 +2,12 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository
 import CarAdvertService._
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CarAdvertService(repository: CarAdvertRepository, carAdvertValidator: CarAdvertValidator)(
+@Singleton
+class CarAdvertService @Inject()(repository: CarAdvertRepository, carAdvertValidator: CarAdvertValidator)(
     implicit ec: ExecutionContext
 ) {
 

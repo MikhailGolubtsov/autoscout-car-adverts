@@ -2,6 +2,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts
 
 import java.time.Clock
 
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.{CarAdvertInMemoryRepository, CarAdvertRepository}
 import com.google.inject.AbstractModule
 
 /**
@@ -14,6 +15,9 @@ class ApplicationModule extends AbstractModule {
   override def configure() = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+    bind(classOf[CarAdvertRepository])
+      .to(classOf[CarAdvertInMemoryRepository])
+      .asEagerSingleton()
   }
 
 }
