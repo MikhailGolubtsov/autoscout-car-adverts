@@ -1,16 +1,16 @@
 package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import java.time.{Clock, LocalDate}
-import CarAdvertCreationError._
+import CarAdvertValidationError._
 
 class CarAdvertCreateRequestValidator(clock: Clock) {
 
-  def validate(request: CarAdvertCreateRequest): Set[CarAdvertCreationError] = {
+  def validate(request: CarAdvertCreateRequest): Set[CarAdvertValidationError] = {
     val validationErrors = allChecks.flatMap(_.apply(request))
     validationErrors.toSet
   }
 
-  private type ValidationCheck = CarAdvertCreateRequest => Option[CarAdvertCreationError]
+  private type ValidationCheck = CarAdvertCreateRequest => Option[CarAdvertValidationError]
 
   private val allChecks: Seq[ValidationCheck] = Seq(
     checkIf(InvalidPrice, { r =>
@@ -35,7 +35,7 @@ class CarAdvertCreateRequestValidator(clock: Clock) {
   )
 
   private def checkIf(
-      errorToReturn: CarAdvertCreationError,
+      errorToReturn: CarAdvertValidationError,
       conditionToCheck: CarAdvertCreateRequest => Boolean
   ): ValidationCheck = { request =>
     if (conditionToCheck(request)) {
@@ -55,37 +55,37 @@ class CarAdvertCreateRequestValidator(clock: Clock) {
   }
 }
 
-sealed trait CarAdvertCreationError {
+sealed trait CarAdvertValidationError {
   def errorMessage: String
 }
 
-object CarAdvertCreationError {
+object CarAdvertValidationError {
 
-  case object InvalidPrice extends CarAdvertCreationError {
+  case object InvalidPrice extends CarAdvertValidationError {
     override def errorMessage: String = "Price must be positive"
   }
 
-  case object NewCarHasRegistrationDate extends CarAdvertCreationError {
+  case object NewCarHasRegistrationDate extends CarAdvertValidationError {
     override def errorMessage: String = "For new cars registration date must be not present"
   }
 
-  case object NewCarHasMileage extends CarAdvertCreationError {
+  case object NewCarHasMileage extends CarAdvertValidationError {
     override def errorMessage: String = "For new cars mileage must be not present"
   }
 
-  case object UsedCarHasNoRegistrationDate extends CarAdvertCreationError {
+  case object UsedCarHasNoRegistrationDate extends CarAdvertValidationError {
     override def errorMessage: String = "For used cars registration date is required"
   }
 
-  case object UsedCarHasNoMileage extends CarAdvertCreationError {
+  case object UsedCarHasNoMileage extends CarAdvertValidationError {
     override def errorMessage: String = "For used cars mileage is required"
   }
 
-  case object TitleIsEmpty extends CarAdvertCreationError {
+  case object TitleIsEmpty extends CarAdvertValidationError {
     override def errorMessage: String = "Title must be not empty"
   }
 
-  case object RegistrationDateInFuture extends CarAdvertCreationError {
+  case object RegistrationDateInFuture extends CarAdvertValidationError {
     override def errorMessage: String = "Registration date cannot be a future date"
   }
 

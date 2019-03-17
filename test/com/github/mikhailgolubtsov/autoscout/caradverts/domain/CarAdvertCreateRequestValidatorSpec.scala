@@ -1,7 +1,7 @@
 package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import java.time._
-import CarAdvertCreationError._
+import CarAdvertValidationError._
 
 import org.scalatest.{MustMatchers, WordSpec}
 
