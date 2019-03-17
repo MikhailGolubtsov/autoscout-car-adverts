@@ -90,10 +90,10 @@ class CarAdvertValidatorSpec extends WordSpec with MustMatchers {
         firstRegistrationDate = Some(today.minusYears(5)))
     }
 
-    def validator: CarAdvertCreateRequestValidator = {
+    def validator: CarAdvertValidator = {
       val zone = ZoneId.of("UTC")
       val clock: Clock = Clock.fixed(today.atStartOfDay(zone).toInstant, zone)
-      new CarAdvertCreateRequestValidator(clock)
+      new CarAdvertValidator(clock)
     }
 
   }

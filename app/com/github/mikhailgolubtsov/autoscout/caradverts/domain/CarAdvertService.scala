@@ -5,12 +5,12 @@ import CarAdvertService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CarAdvertService(repository: CarAdvertRepository, createRequestValidator: CarAdvertCreateRequestValidator)(
+class CarAdvertService(repository: CarAdvertRepository, carAdvertValidator: CarAdvertValidator)(
     implicit ec: ExecutionContext
 ) {
 
   def createCarAdvert(carAdvert: CarAdvert): Future[Option[CreationError]] = {
-    val validationErrors = createRequestValidator.validate(carAdvert)
+    val validationErrors = carAdvertValidator.validate(carAdvert)
     if (validationErrors.isEmpty) {
       for {
         persistenceErrorMaybe <- repository.createCarAdvert(carAdvert)

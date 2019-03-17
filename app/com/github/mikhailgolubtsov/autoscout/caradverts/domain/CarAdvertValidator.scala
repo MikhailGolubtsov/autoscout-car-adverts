@@ -3,7 +3,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 import java.time.{Clock, LocalDate}
 import CarAdvertValidationError._
 
-class CarAdvertCreateRequestValidator(clock: Clock) {
+class CarAdvertValidator(clock: Clock) {
 
   def validate(request: CarAdvert): Set[CarAdvertValidationError] = {
     val validationErrors = allChecks.flatMap(_.apply(request))
