@@ -28,7 +28,7 @@ class CarAdvertService(repository: CarAdvertRepository, carAdvertValidator: CarA
 }
 
 object CarAdvertService {
-  sealed class CreationError
+  sealed abstract class CreationError
   object CreationError {
     case class InvalidRequest(validationErrors: Set[CarAdvertValidationError]) extends CreationError
     case class DuplicateCarAdvertId(advertId: AdvertId) extends CreationError

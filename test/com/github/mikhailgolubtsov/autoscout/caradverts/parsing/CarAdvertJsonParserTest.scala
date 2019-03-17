@@ -6,6 +6,7 @@ import java.util.UUID
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{CarAdvert, FuelType}
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.libs.json.{JsError, JsSuccess, Json}
+import CarAdvertJsonParser._
 
 class CarAdvertJsonParserTest extends WordSpec with MustMatchers {
 
@@ -21,7 +22,7 @@ class CarAdvertJsonParserTest extends WordSpec with MustMatchers {
           |  "new": true
           |}
         """.stripMargin
-      val parsingResult = new CarAdvertJsonParser().parseRequest(Json.parse(jsonStr))
+      val parsingResult = parseJsonToCarAdvert(jsonStr)
       parsingResult mustBe JsSuccess(CarAdvert(
         id = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549"),
         title = "Audi",
@@ -45,7 +46,7 @@ class CarAdvertJsonParserTest extends WordSpec with MustMatchers {
           |  "first_registration": "2015-06-01"
           |}
         """.stripMargin
-      val parsingResult = new CarAdvertJsonParser().parseRequest(Json.parse(jsonStr))
+      val parsingResult = parseJsonToCarAdvert(jsonStr)
       parsingResult mustBe JsSuccess(CarAdvert(
         id = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549"),
         title = "Volkswagen",
@@ -67,8 +68,12 @@ class CarAdvertJsonParserTest extends WordSpec with MustMatchers {
           |  "new": true
           |}
         """.stripMargin
-      val parsingResult = new CarAdvertJsonParser().parseRequest(Json.parse(jsonStr))
+      val parsingResult = parseJsonToCarAdvert(jsonStr)
       parsingResult mustBe a[JsError]
     }
+  }
+
+  private def parseJsonToCarAdvert(jsonStr: String) = {
+    Json.fromJson[CarAdvert](Json.parse(jsonStr))
   }
 }

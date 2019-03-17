@@ -1,6 +1,6 @@
 package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
-sealed class FuelType
+sealed abstract class FuelType
 
 object FuelType {
 
