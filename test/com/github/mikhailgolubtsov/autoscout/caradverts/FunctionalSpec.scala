@@ -2,7 +2,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts
 
 import org.scalatest.OptionValues
 import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.{GuiceOneAppPerSuite, GuiceOneAppPerTest}
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.test.FakeRequest

@@ -1,4 +1,4 @@
-package com.github.mikhailgolubtsov.autoscout.caradverts.controllers
+package com.github.mikhailgolubtsov.autoscout.caradverts.web.controllers
 
 import java.time.{LocalDate, Month}
 import java.util.UUID

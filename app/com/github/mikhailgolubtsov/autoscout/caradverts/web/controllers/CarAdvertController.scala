@@ -1,16 +1,16 @@
-package com.github.mikhailgolubtsov.autoscout.caradverts.controllers
+package com.github.mikhailgolubtsov.autoscout.caradverts.web.controllers
 
 import java.util.UUID
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, SortKey, UpdateError}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{CarAdvert, CarAdvertService, CarAdvertValidationError}
-import com.github.mikhailgolubtsov.autoscout.caradverts.dto.CarAdvertUpdateRequest
+import com.github.mikhailgolubtsov.autoscout.caradverts.web.dto.CarAdvertUpdateRequest
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
-import com.github.mikhailgolubtsov.autoscout.caradverts.parsing.CarAdvertJsonParser._
+import com.github.mikhailgolubtsov.autoscout.caradverts.web.parsing.CarAdvertJsonParser._
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
 
 @Singleton

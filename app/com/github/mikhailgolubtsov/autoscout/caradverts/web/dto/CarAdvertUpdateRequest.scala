@@ -1,4 +1,4 @@
-package com.github.mikhailgolubtsov.autoscout.caradverts.dto
+package com.github.mikhailgolubtsov.autoscout.caradverts.web.dto
 
 import java.time.LocalDate
 

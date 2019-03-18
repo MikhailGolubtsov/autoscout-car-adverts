@@ -1,11 +1,11 @@
-package com.github.mikhailgolubtsov.autoscout.caradverts.parsing
+package com.github.mikhailgolubtsov.autoscout.caradverts.web.parsing
 
 import java.time.LocalDate
 import java.util.UUID
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.FuelType.{Diesel, Gasoline}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{CarAdvert, FuelType}
-import com.github.mikhailgolubtsov.autoscout.caradverts.dto.CarAdvertUpdateRequest
+import com.github.mikhailgolubtsov.autoscout.caradverts.web.dto.CarAdvertUpdateRequest
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 

@@ -1,4 +1,4 @@
-package com.github.mikhailgolubtsov.autoscout.caradverts.controllers
+package com.github.mikhailgolubtsov.autoscout.caradverts.web.controllers
 
 import controllers.AssetsFinder
 import javax.inject._
