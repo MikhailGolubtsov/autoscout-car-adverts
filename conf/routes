@@ -3,3 +3,6 @@
 # ~~~~
 
 GET  /      com.github.mikhailgolubtsov.autoscout.caradverts.controllers.HomeController.index
+
+POST /car-adverts      com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.createCarAdvert
+GET  /car-adverts/:id  com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.getCarAdvertById(id)
