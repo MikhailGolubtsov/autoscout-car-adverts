@@ -9,8 +9,12 @@ trait CarAdvertRepository {
   def createCarAdvert(carAdvert: CarAdvert): Future[Option[DuplicateIdError]]
 
   def getCarAdvertById(advertId: AdvertId): Future[Option[CarAdvert]]
+
+  def deleteCarAdvertById(advertId: AdvertId): Future[Option[CarAdvertNotFoundError]]
 }
 
 object CarAdvertRepository {
   case class DuplicateIdError(advertId: AdvertId)
+
+  case class CarAdvertNotFoundError(advertId: AdvertId)
 }

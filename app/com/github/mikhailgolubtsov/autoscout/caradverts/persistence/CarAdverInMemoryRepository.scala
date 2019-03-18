@@ -2,7 +2,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.persistence
 import java.util.concurrent.ConcurrentHashMap
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{AdvertId, CarAdvert}
-import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.DuplicateIdError
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository._
 
 import scala.concurrent.Future
 
@@ -24,6 +24,17 @@ class CarAdvertInMemoryRepository extends CarAdvertRepository {
   override def getCarAdvertById(advertId: AdvertId): Future[Option[CarAdvert]] = {
     Future.successful {
       Option(carAdverts.get(advertId))
+    }
+  }
+
+  override def deleteCarAdvertById(advertId: AdvertId): Future[Option[CarAdvertNotFoundError]] = {
+    Future.successful {
+      val removedAdvert = carAdverts.remove(advertId)
+      if (removedAdvert == null) {
+        Some(CarAdvertNotFoundError(advertId))
+      } else {
+        None
+      }
     }
   }
 }

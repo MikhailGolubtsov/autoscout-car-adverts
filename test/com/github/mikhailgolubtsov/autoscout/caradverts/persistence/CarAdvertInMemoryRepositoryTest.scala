@@ -3,7 +3,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.persistence
 import java.util.UUID
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{AdvertId, CarAdvert, FuelType}
-import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.DuplicateIdError
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.{CarAdvertNotFoundError, DuplicateIdError}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
@@ -46,6 +46,42 @@ class CarAdvertInMemoryRepositoryTest extends WordSpec with MustMatchers with Sc
 
       whenReady(result) { carAdvertMaybe =>
         carAdvertMaybe.value mustBe carAdvert
+      }
+    }
+
+    "return error if deleting not existing car advert" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val id = someId()
+      whenReady(repository.deleteCarAdvertById(id)) { errorMaybe =>
+        errorMaybe.value mustBe CarAdvertNotFoundError(id)
+      }
+    }
+
+    "return no error when deleting existing car advert" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val result = for {
+        _ <- repository.createCarAdvert(carAdvert)
+        maybeError <- repository.deleteCarAdvertById(carAdvert.id)
+      } yield maybeError
+
+      whenReady(result) { maybeError =>
+        maybeError mustBe None
+      }
+    }
+
+    "find no car advert after deleting it" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val result = for {
+        _ <- repository.createCarAdvert(carAdvert)
+        _ <- repository.deleteCarAdvertById(carAdvert.id)
+        carAdvertMaybe <- repository.getCarAdvertById(carAdvert.id)
+      } yield carAdvertMaybe
+
+      whenReady(result) { carAdvertMaybe =>
+        carAdvertMaybe mustBe None
       }
     }
   }

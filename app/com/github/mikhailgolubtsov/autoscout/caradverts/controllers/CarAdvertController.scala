@@ -10,6 +10,7 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 import com.github.mikhailgolubtsov.autoscout.caradverts.parsing.CarAdvertJsonParser._
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
 
 @Singleton
 class CarAdvertController @Inject()(cc: ControllerComponents, carAdvertService: CarAdvertService)(
@@ -43,6 +44,18 @@ class CarAdvertController @Inject()(cc: ControllerComponents, carAdvertService: 
       .map({
         case None            => NotFound
         case Some(carAdvert) => Ok(Json.toJson(carAdvert))
+      })
+      .recover(recoverException)
+  }
+
+  def deleteCarAdvertById(id: String) = Action.async { request =>
+    val advertId = UUID.fromString(id)
+    carAdvertService
+      .deleteCarAdvertById(advertId)
+      .map({
+        case Some(CarAdvertNotFoundError(_)) =>
+          NotFound(jsonProblem(s"Car advert id='$id' is not found"))
+        case None => Ok
       })
       .recover(recoverException)
   }

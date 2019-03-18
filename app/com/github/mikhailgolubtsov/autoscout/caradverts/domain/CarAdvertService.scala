@@ -2,6 +2,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository
 import CarAdvertService._
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,6 +27,10 @@ class CarAdvertService @Inject()(repository: CarAdvertRepository, carAdvertValid
 
   def getCarAdvertById(advertId: AdvertId): Future[Option[CarAdvert]] = {
     repository.getCarAdvertById(advertId)
+  }
+
+  def deleteCarAdvertById(advertId: AdvertId): Future[Option[CarAdvertNotFoundError]] = {
+    repository.deleteCarAdvertById(advertId)
   }
 }
 
