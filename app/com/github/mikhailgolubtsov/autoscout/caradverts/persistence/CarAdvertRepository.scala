@@ -11,6 +11,8 @@ trait CarAdvertRepository {
   def getCarAdvertById(advertId: AdvertId): Future[Option[CarAdvert]]
 
   def deleteCarAdvertById(advertId: AdvertId): Future[Option[CarAdvertNotFoundError]]
+
+  def updateCarAdvert(carAdvert: CarAdvert): Future[Option[CarAdvertNotFoundError]]
 }
 
 object CarAdvertRepository {

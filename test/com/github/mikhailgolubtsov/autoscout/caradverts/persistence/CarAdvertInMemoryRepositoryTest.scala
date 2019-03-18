@@ -84,6 +84,42 @@ class CarAdvertInMemoryRepositoryTest extends WordSpec with MustMatchers with Sc
         carAdvertMaybe mustBe None
       }
     }
+
+    "return error if updating not existing car advert" in {
+      val repository = new CarAdvertInMemoryRepository()
+      whenReady(repository.updateCarAdvert(carAdvert)) { maybeError =>
+        maybeError.value mustBe CarAdvertNotFoundError(carAdvert.id)
+      }
+    }
+
+    "return no error if updating existing car advert" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val updatedCarAdvert = carAdvert.copy(price = carAdvert.price + 1)
+      val result = for {
+        _ <- repository.createCarAdvert(carAdvert)
+        maybeError <- repository.updateCarAdvert(updatedCarAdvert)
+      } yield maybeError
+
+      whenReady(result) { maybeError =>
+        maybeError mustBe None
+      }
+    }
+
+    "return updated car advert after updating it" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val updatedCarAdvert = carAdvert.copy(price = carAdvert.price + 1)
+      val result = for {
+        _ <- repository.createCarAdvert(carAdvert)
+        _ <- repository.updateCarAdvert(updatedCarAdvert)
+        maybeCarAdvert <- repository.getCarAdvertById(carAdvert.id)
+      } yield maybeCarAdvert
+
+      whenReady(result) { maybeCarAdvert =>
+        maybeCarAdvert.value mustBe updatedCarAdvert
+      }
+    }
   }
 
   val carAdvert: CarAdvert = {

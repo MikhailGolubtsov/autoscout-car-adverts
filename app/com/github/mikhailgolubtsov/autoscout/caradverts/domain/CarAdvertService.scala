@@ -1,11 +1,12 @@
 package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.UpdateError
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository
-import CarAdvertService._
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
+import CarAdvertService._
 
 @Singleton
 class CarAdvertService @Inject()(repository: CarAdvertRepository, carAdvertValidator: CarAdvertValidator)(
@@ -32,6 +33,19 @@ class CarAdvertService @Inject()(repository: CarAdvertRepository, carAdvertValid
   def deleteCarAdvertById(advertId: AdvertId): Future[Option[CarAdvertNotFoundError]] = {
     repository.deleteCarAdvertById(advertId)
   }
+
+  def updateCarAdvert(carAdvert: CarAdvert): Future[Option[UpdateError]] = {
+    val validationErrors = carAdvertValidator.validate(carAdvert)
+    if (validationErrors.isEmpty) {
+      for {
+        maybeNonFoundError <- repository.updateCarAdvert(carAdvert)
+      } yield {
+        maybeNonFoundError.map(e => UpdateError.NotFoundCarAdvert(e.advertId))
+      }
+    } else {
+      Future.successful(Some(UpdateError.InvalidRequest(validationErrors)))
+    }
+  }
 }
 
 object CarAdvertService {
@@ -39,6 +53,12 @@ object CarAdvertService {
   object CreationError {
     case class InvalidRequest(validationErrors: Set[CarAdvertValidationError]) extends CreationError
     case class DuplicateCarAdvertId(advertId: AdvertId) extends CreationError
+  }
+
+  sealed abstract class UpdateError
+  object UpdateError {
+    case class InvalidRequest(validationErrors: Set[CarAdvertValidationError]) extends UpdateError
+    case class NotFoundCarAdvert(advertId: AdvertId) extends UpdateError
   }
 
 }

@@ -5,6 +5,7 @@ import java.util.UUID
 
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.FuelType.{Diesel, Gasoline}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{CarAdvert, FuelType}
+import com.github.mikhailgolubtsov.autoscout.caradverts.dto.CarAdvertUpdateRequest
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -28,6 +29,15 @@ object CarAdvertJsonParser {
       }
     }
   }
+
+  implicit val carAdvertUpdateRequestFormat: Format[CarAdvertUpdateRequest] = (
+    (__ \ "title").format[String] and
+      (__ \ "fuel").format[FuelType] and
+      (__ \ "price").format[Int] and
+      (__ \ "new").format[Boolean] and
+      (__ \ "mileage").formatNullable[Int] and
+      (__ \ "first_registration").formatNullable[LocalDate]
+  )(CarAdvertUpdateRequest.apply, unlift(CarAdvertUpdateRequest.unapply))
 
   implicit val carAdvertFormat: Format[CarAdvert] = (
     (__ \ "id").format[UUID] and

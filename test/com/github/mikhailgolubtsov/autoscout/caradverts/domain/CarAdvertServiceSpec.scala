@@ -3,11 +3,10 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.domain
 import java.time.{Clock, LocalDate, Month, ZoneId}
 import java.util.UUID
 
-import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.CreationError
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, UpdateError}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.CreationError.DuplicateCarAdvertId
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertValidationError.InvalidPrice
-import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.DuplicateIdError
-import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.{CarAdvertInMemoryRepository, CarAdvertRepository}
+import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertInMemoryRepository
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
@@ -52,6 +51,38 @@ class CarAdvertServiceSpec extends WordSpec with MustMatchers with ScalaFutures 
 
       whenReady(result) { maybeCarAdvert =>
         maybeCarAdvert.value mustBe carAdvertToCreate
+      }
+    }
+
+    "return not found error on update of non existing car advert" in {
+      val service = createService
+
+      whenReady(service.updateCarAdvert(validCarAdvert)) { maybeError =>
+        maybeError.value mustBe UpdateError.NotFoundCarAdvert(validCarAdvert.id)
+      }
+    }
+
+    "return validation error if a domain rule is violated" in {
+      val service = createService
+
+      whenReady(service.updateCarAdvert(invalidCarAdvert)) { maybeError =>
+        maybeError.value mustBe UpdateError.InvalidRequest(Set(InvalidPrice))
+      }
+    }
+
+    "return no error on update of existing car advert and get it by id" in {
+      val service = createService
+
+      val updateCarAdvert = validCarAdvert.copy(price = validCarAdvert.price + 1)
+      val result = for {
+        _ <- service.createCarAdvert(validCarAdvert)
+        maybeUpdateError <- service.updateCarAdvert(updateCarAdvert)
+        maybeUpdatedCarAdvert <- service.getCarAdvertById(updateCarAdvert.id)
+      } yield  (maybeUpdateError, maybeUpdatedCarAdvert)
+
+      whenReady(result) { case (maybeUpdateError, maybeUpdatedCarAdvert) =>
+        maybeUpdateError mustBe None
+        maybeUpdatedCarAdvert.value mustBe updateCarAdvert
       }
     }
   }

@@ -5,7 +5,8 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.CreationError
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, UpdateError}
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertValidationError.InvalidPrice
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{AdvertId, CarAdvert, CarAdvertService, FuelType}
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
 import org.mockito.ArgumentMatchers
@@ -35,6 +36,15 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
           "new": true
         }
         """
+  val jsonRequestWithoutId =
+    """
+          {
+            "title": "Audi",
+            "fuel": "gasoline",
+            "price": 10000,
+            "new": true
+          }
+        """
   val carAdvertId = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549")
 
   "Car advert controller creating car advert" should {
@@ -58,16 +68,7 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
 
     "return 400 if there is a missing field (id) in the request" in {
       val controller = controllerWith(happyCaseService)
-      val jsonRequest =
-        """
-          {
-            "title": "Audi",
-            "fuel": "gasoline",
-            "price": 10000,
-            "new": true
-          }
-        """
-      val request = requestWith(jsonRequest)
+      val request = requestWith(jsonRequestWithoutId)
       val result = controller.createCarAdvert(request)
 
       status(result) mustBe 400
@@ -188,6 +189,53 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
     }
   }
 
+  "Car advert controller updating car advert" should {
+    "return 200 if update was successful" in {
+      val service = mockedServiceWithUpdateResult(Future.successful(None))
+      val controller = controllerWith(service)
+      val request = requestWith(jsonRequestWithoutId)
+      val result = controller.updateCarAdvert(carAdvertId.toString)(request)
+
+      status(result) mustBe 200
+    }
+    "return 404 if update returned 'not found' error" in {
+      val service = mockedServiceWithUpdateResult(Future.successful(Some(UpdateError.NotFoundCarAdvert(carAdvertId))))
+      val controller = controllerWith(service)
+      val request = requestWith(jsonRequestWithoutId)
+      val result = controller.updateCarAdvert(carAdvertId.toString)(request)
+
+      status(result) mustBe 404
+      jsonErrorMessage(contentAsJson(result)) mustBe s"Car advert id='${carAdvertId}' is not found"
+    }
+    "return 400 if a validation error is returned by the service" in {
+      val updateError = UpdateError.InvalidRequest(Set(InvalidPrice))
+      val service = mockedServiceWithUpdateResult(Future.successful(Some(updateError)))
+      val controller = controllerWith(service)
+      val updateRequest =
+        """
+          {
+            "title": "Audi",
+            "fuel": "gasoline",
+            "price": -1,
+            "new": true
+          }
+        """
+      val request = requestWith(updateRequest)
+      val result = controller.updateCarAdvert(carAdvertId.toString)(request)
+
+      status(result) mustBe 400
+    }
+    "return 400 if request is not json" in {
+      val service = mockedServiceWithUpdateResult(Future.successful(None))
+      val controller = controllerWith(service)
+      val request = FakeRequest().withBody("not json")
+      val result = controller.updateCarAdvert(carAdvertId.toString)(request)
+
+      status(result) mustBe 400
+      jsonErrorMessage(contentAsJson(result)) mustBe "Json request is expected"
+    }
+  }
+
   private def requestWith(jsonRequest: String) = {
     FakeRequest().withJsonBody(Json.parse(jsonRequest))
   }
@@ -225,4 +273,11 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
     when(service.deleteCarAdvertById(ArgumentMatchers.eq(requestedId))).thenReturn(result)
     service
   }
+
+  def mockedServiceWithUpdateResult(result: Future[Option[UpdateError]]): CarAdvertService = {
+    val service = mock[CarAdvertService]
+    when(service.updateCarAdvert(any[CarAdvert])).thenReturn(result)
+    service
+  }
+
 }

@@ -6,4 +6,5 @@ GET  /      com.github.mikhailgolubtsov.autoscout.caradverts.controllers.HomeCon
 
 POST /car-adverts      com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.createCarAdvert
 GET  /car-adverts/:id  com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.getCarAdvertById(id)
+PUT  /car-adverts/:id  com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.updateCarAdvert(id)
 DELETE /car-adverts/:id  com.github.mikhailgolubtsov.autoscout.caradverts.controllers.CarAdvertController.deleteCarAdvertById(id)

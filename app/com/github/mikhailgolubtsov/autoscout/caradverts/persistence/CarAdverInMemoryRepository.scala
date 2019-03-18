@@ -37,4 +37,15 @@ class CarAdvertInMemoryRepository extends CarAdvertRepository {
       }
     }
   }
+
+  override def updateCarAdvert(carAdvert: CarAdvert): Future[Option[CarAdvertNotFoundError]] = {
+    Future.successful {
+      val previousState = carAdverts.put(carAdvert.id, carAdvert)
+      if (previousState == null) {
+        Some(CarAdvertNotFoundError(carAdvert.id))
+      } else {
+        None
+      }
+    }
+  }
 }
