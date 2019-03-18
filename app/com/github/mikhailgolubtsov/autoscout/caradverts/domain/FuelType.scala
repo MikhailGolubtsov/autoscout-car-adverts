@@ -8,4 +8,6 @@ object FuelType {
 
   case object Gasoline extends FuelType
 
+  implicit val ordering: Ordering[FuelType] = Ordering.by(_.getClass.getName)
+
 }

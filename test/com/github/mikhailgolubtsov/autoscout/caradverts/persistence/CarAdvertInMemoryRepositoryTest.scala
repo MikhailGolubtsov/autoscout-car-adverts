@@ -119,6 +119,29 @@ class CarAdvertInMemoryRepositoryTest extends WordSpec with MustMatchers with Sc
       whenReady(result) { maybeCarAdvert =>
         maybeCarAdvert.value mustBe updatedCarAdvert
       }
+
+    }
+
+    "return empty list of car adverts if none is created" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      whenReady(repository.getAllCarAdverts()) { allAdverts =>
+        allAdverts mustBe List()
+      }
+    }
+
+    "return list of car adverts with a created car advert" in {
+      val repository = new CarAdvertInMemoryRepository()
+
+      val result = for {
+        _ <- repository.createCarAdvert(carAdvert)
+        allAdverts <- repository.getAllCarAdverts()
+      } yield {
+        allAdverts
+      }
+      whenReady(result) { allAdverts =>
+        allAdverts mustBe List(carAdvert)
+      }
     }
   }
 

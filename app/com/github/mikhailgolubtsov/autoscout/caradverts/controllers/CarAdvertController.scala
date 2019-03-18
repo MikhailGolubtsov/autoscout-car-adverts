@@ -2,7 +2,7 @@ package com.github.mikhailgolubtsov.autoscout.caradverts.controllers
 
 import java.util.UUID
 
-import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, UpdateError}
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, SortKey, UpdateError}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{CarAdvert, CarAdvertService, CarAdvertValidationError}
 import com.github.mikhailgolubtsov.autoscout.caradverts.dto.CarAdvertUpdateRequest
 import javax.inject.{Inject, Singleton}
@@ -24,6 +24,18 @@ class CarAdvertController @Inject()(cc: ControllerComponents, carAdvertService: 
 
   def updateCarAdvert(id: String) = Action.async { request =>
     handleJsonCarAdvertRequest[CarAdvertUpdateRequest](request, updateCarAdvertWithErrorHandling(id, _))
+  }
+
+  def getAllCarAdverts(sortKey: Option[String]) = Action.async { _ =>
+    val errorOrParsedSortKey: Either[String, Option[SortKey]] = parseSortKey(sortKey)
+    errorOrParsedSortKey match {
+      case Right(maybeSortKey) =>
+        getAllCarAdvertsResponse(maybeSortKey)
+      case Left(errorMessage) =>
+        Future.successful {
+          BadRequest(jsonProblem(errorMessage))
+        }
+    }
   }
 
   def getCarAdvertById(id: String) = Action.async { request =>
@@ -115,6 +127,32 @@ class CarAdvertController @Inject()(cc: ControllerComponents, carAdvertService: 
     carAdvertService
       .createCarAdvert(carAdvert)
       .map(creationResultToResponse)
+      .recover(recoverException)
+  }
+
+  private def parseSortKey(sortKey: Option[String]) = {
+    sortKey match {
+      case Some(sortKey) =>
+        sortKey match {
+          case "id"                 => Right(Some(SortKey.Id))
+          case "title"              => Right(Some(SortKey.Title))
+          case "price"              => Right(Some(SortKey.Price))
+          case "new"                => Right(Some(SortKey.IsNew))
+          case "fuel"               => Right(Some(SortKey.FuelType))
+          case "mileage"            => Right(Some(SortKey.Mileage))
+          case "first_registration" => Right(Some(SortKey.FirstRegistrationDate))
+          case other                => Left(s"Invalid sort key - $other")
+        }
+      case None => Right(None)
+    }
+  }
+
+  private def getAllCarAdvertsResponse(maybeSortKey: Option[SortKey]): Future[Result] = {
+    carAdvertService
+      .getAllCarAdverts(maybeSortKey)
+      .map({ allCarAdverts =>
+        Ok(Json.toJson(allCarAdverts))
+      })
       .recover(recoverException)
   }
 

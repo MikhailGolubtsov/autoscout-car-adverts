@@ -27,7 +27,7 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerTest with OptionValues 
 
   "CarAdvertController" should {
 
-    "create a car advert and get it by id" in {
+    "create a car advert and get it by id and in a list" in {
       val createRequest = FakeRequest(POST, "/car-adverts").withJsonBody(validJsonCreateRequest)
       val createRequestResponse = route(app, createRequest).value
 
@@ -38,6 +38,16 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerTest with OptionValues 
 
       status(getRequestResponse) mustBe 200
       contentAsJson(getRequestResponse) mustBe validJsonCreateRequest
+
+      val getAllRequest = FakeRequest(GET, "/car-adverts?sort=new")
+      val getAllResponse = route(app, getAllRequest).value
+      status(getAllResponse) mustBe 200
+      contentAsJson(getAllResponse) mustBe Json.arr(validJsonCreateRequest)
+
+      val getAllRequestWithSorting = FakeRequest(GET, "/car-adverts?sort=price")
+      val getAllResponseWithSorting = route(app, getAllRequestWithSorting).value
+      status(getAllResponseWithSorting) mustBe 200
+      contentAsJson(getAllResponseWithSorting) mustBe Json.arr(validJsonCreateRequest)
     }
 
     "create and delete a car advert, should not be found when looked up" in {

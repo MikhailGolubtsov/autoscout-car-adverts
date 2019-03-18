@@ -46,6 +46,22 @@ class CarAdvertService @Inject()(repository: CarAdvertRepository, carAdvertValid
       Future.successful(Some(UpdateError.InvalidRequest(validationErrors)))
     }
   }
+
+  def getAllCarAdverts(sortKeyMaybe: Option[SortKey]): Future[List[CarAdvert]] = {
+    val sortKey = sortKeyMaybe.getOrElse(SortKey.Id)
+
+    repository.getAllCarAdverts().map { allCarAdverts =>
+      sortKey match {
+        case SortKey.Id                    => allCarAdverts.sortBy(_.id)
+        case SortKey.Title                 => allCarAdverts.sortBy(_.title)
+        case SortKey.Price                 => allCarAdverts.sortBy(_.price)
+        case SortKey.FuelType              => allCarAdverts.sortBy(_.fuel)
+        case SortKey.IsNew                 => allCarAdverts.sortBy(_.isNew)
+        case SortKey.Mileage               => allCarAdverts.sortBy(_.mileage)
+        case SortKey.FirstRegistrationDate => allCarAdverts.sortBy(_.firstRegistrationDate)
+      }
+    }
+  }
 }
 
 object CarAdvertService {
@@ -61,4 +77,14 @@ object CarAdvertService {
     case class NotFoundCarAdvert(advertId: AdvertId) extends UpdateError
   }
 
+  sealed abstract class SortKey
+  object SortKey {
+    case object Id extends SortKey
+    case object Title extends SortKey
+    case object Price extends SortKey
+    case object FuelType extends SortKey
+    case object IsNew extends SortKey
+    case object Mileage extends SortKey
+    case object FirstRegistrationDate extends SortKey
+  }
 }

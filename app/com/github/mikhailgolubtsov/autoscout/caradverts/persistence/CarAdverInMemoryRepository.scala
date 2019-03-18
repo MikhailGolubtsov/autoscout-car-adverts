@@ -5,6 +5,7 @@ import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{AdvertId, CarAdv
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository._
 
 import scala.concurrent.Future
+import collection.JavaConverters._
 
 class CarAdvertInMemoryRepository extends CarAdvertRepository {
 
@@ -46,6 +47,12 @@ class CarAdvertInMemoryRepository extends CarAdvertRepository {
       } else {
         None
       }
+    }
+  }
+
+  override def getAllCarAdverts(): Future[List[CarAdvert]] = {
+    Future.successful {
+      carAdverts.values().asScala.toList
     }
   }
 }

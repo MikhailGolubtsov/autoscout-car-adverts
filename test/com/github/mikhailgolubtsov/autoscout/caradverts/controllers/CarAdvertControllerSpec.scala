@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, UpdateError}
+import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertService.{CreationError, SortKey, UpdateError}
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.CarAdvertValidationError.InvalidPrice
 import com.github.mikhailgolubtsov.autoscout.caradverts.domain.{AdvertId, CarAdvert, CarAdvertService, FuelType}
 import com.github.mikhailgolubtsov.autoscout.caradverts.persistence.CarAdvertRepository.CarAdvertNotFoundError
@@ -112,20 +112,10 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
 
   "Car advert controller requesting car advert by id" should {
     "return 200 and proper json body when existing car advert is requested" in {
-      val id = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549")
-      var carAdvert =
-        CarAdvert(
-          id = id,
-          title = "Volkswagen",
-          fuel = FuelType.Diesel,
-          price = 5000,
-          isNew = false,
-          mileage = Some(50000),
-          firstRegistrationDate = Some(LocalDate.of(2015, Month.JUNE, 1))
-        )
-      val service = mockedServiceWith(requestedId = id, Future.successful(Some(carAdvert)))
+      val carAdvert: CarAdvert = validCarAdvert
+      val service = mockedServiceWith(requestedId = carAdvert.id, Future.successful(Some(carAdvert)))
       val controller = controllerWith(service)
-      val result = controller.getCarAdvertById(id.toString)(FakeRequest())
+      val result = controller.getCarAdvertById(carAdvert.id.toString)(FakeRequest())
 
       val expectedJson = Json.parse("""
         {
@@ -236,6 +226,75 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
     }
   }
 
+  "Car advert controller getting all car adverts" should {
+    "return 200 and a list of car adverts if service response was successful" in {
+      val service = mockedServiceWithGetAllAdvertsResult(sortKey = Some(SortKey.IsNew), Future.successful(List(validCarAdvert)))
+      val controller = controllerWith(service)
+      val result = controller.getAllCarAdverts(sortKey = Some("new"))(FakeRequest())
+
+      val expectedJson = Json.parse("""
+        [
+         {
+          "id": "8d49c3f5-7637-4528-809f-0bed8f72e549",
+          "title": "Volkswagen",
+          "fuel": "diesel",
+          "price": 5000,
+          "new": false,
+          "mileage": 50000,
+          "first_registration": "2015-06-01"
+         }
+        ]
+        """)
+      status(result) mustBe 200
+      contentAsJson(result) mustBe expectedJson
+    }
+    "return 200 and a list of car adverts if service response was successful and no sort key" in {
+      val service = mockedServiceWithGetAllAdvertsResult(sortKey = None, Future.successful(List(validCarAdvert)))
+      val controller = controllerWith(service)
+      val result = controller.getAllCarAdverts(sortKey = None)(FakeRequest())
+
+      val expectedJson = Json.parse("""
+        [
+         {
+          "id": "8d49c3f5-7637-4528-809f-0bed8f72e549",
+          "title": "Volkswagen",
+          "fuel": "diesel",
+          "price": 5000,
+          "new": false,
+          "mileage": 50000,
+          "first_registration": "2015-06-01"
+         }
+        ]
+        """)
+      status(result) mustBe 200
+      contentAsJson(result) mustBe expectedJson
+    }
+    "return 400 if given unknown sort key" in {
+
+      val service = mockedServiceWithGetAllAdvertsResult(None, Future.successful(List()))
+      val controller = controllerWith(service)
+      val result = controller.getAllCarAdverts(sortKey = Some("unknown key"))(FakeRequest())
+
+      status(result) mustBe 400
+      jsonErrorMessage(contentAsJson(result)) mustBe "Invalid sort key - unknown key"
+    }
+  }
+
+  private def validCarAdvert = {
+    val carAdvert =
+      CarAdvert(
+        id = UUID.fromString("8d49c3f5-7637-4528-809f-0bed8f72e549"),
+        title = "Volkswagen",
+        fuel = FuelType.Diesel,
+        price = 5000,
+        isNew = false,
+        mileage = Some(50000),
+        firstRegistrationDate = Some(LocalDate.of(2015, Month.JUNE, 1))
+      )
+    carAdvert
+  }
+
+
   private def requestWith(jsonRequest: String) = {
     FakeRequest().withJsonBody(Json.parse(jsonRequest))
   }
@@ -277,6 +336,12 @@ class CarAdvertControllerSpec extends PlaySpec with Results with MockitoSugar {
   def mockedServiceWithUpdateResult(result: Future[Option[UpdateError]]): CarAdvertService = {
     val service = mock[CarAdvertService]
     when(service.updateCarAdvert(any[CarAdvert])).thenReturn(result)
+    service
+  }
+
+  def mockedServiceWithGetAllAdvertsResult(sortKey: Option[SortKey], result: Future[List[CarAdvert]]): CarAdvertService = {
+    val service = mock[CarAdvertService]
+    when(service.getAllCarAdverts(ArgumentMatchers.eq(sortKey))).thenReturn(result)
     service
   }
 
